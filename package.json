@@ -1,0 +1,18 @@
+{
+  "name": "babynames",
+  "version": "1.0.0",
+  "description": "Simple web app for voting on baby names.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "tailwind": "npx @tailwindcss/cli -i ./priv/static/input.css -o ./priv/static/styles.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}
