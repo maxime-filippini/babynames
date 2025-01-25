@@ -1,7 +1,29 @@
 import gleam/dynamic/decode
 import gleam/option.{type Option}
 import pog
-import youid/uuid.{type Uuid}
+
+/// Runs the `insert_user` query
+/// defined in `./src/sql/insert_user.sql`.
+///
+/// > 🐿️ This function was generated automatically using v3.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn insert_user(db, arg_1, arg_2, arg_3, arg_4) {
+  let decoder = decode.map(decode.dynamic, fn(_) { Nil })
+
+  let query = "INSERT INTO users (user_id, name, email, email_verified)
+VALUES (
+    $1, $2, $3, $4
+)"
+
+  pog.query(query)
+  |> pog.parameter(pog.text(arg_1))
+  |> pog.parameter(pog.text(arg_2))
+  |> pog.parameter(pog.text(arg_3))
+  |> pog.parameter(pog.bool(arg_4))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
 
 /// A row you get from running the `find_user` query
 /// defined in `./src/sql/find_user.sql`.
@@ -10,7 +32,12 @@ import youid/uuid.{type Uuid}
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type FindUserRow {
-  FindUserRow(id: Option(Uuid), name: Option(String), email: Option(String))
+  FindUserRow(
+    user_id: String,
+    name: Option(String),
+    email: Option(String),
+    email_verified: Option(Bool),
+  )
 }
 
 /// Runs the `find_user` query
@@ -21,30 +48,19 @@ pub type FindUserRow {
 ///
 pub fn find_user(db, arg_1) {
   let decoder = {
-    use id <- decode.field(0, decode.optional(uuid_decoder()))
+    use user_id <- decode.field(0, decode.string)
     use name <- decode.field(1, decode.optional(decode.string))
     use email <- decode.field(2, decode.optional(decode.string))
-    decode.success(FindUserRow(id:, name:, email:))
+    use email_verified <- decode.field(3, decode.optional(decode.bool))
+    decode.success(FindUserRow(user_id:, name:, email:, email_verified:))
   }
 
   let query = "SELECT *
 FROM users
-WHERE id = $1"
+WHERE user_id = $1"
 
   pog.query(query)
-  |> pog.parameter(pog.text(uuid.to_string(arg_1)))
+  |> pog.parameter(pog.text(arg_1))
   |> pog.returning(decoder)
   |> pog.execute(db)
-}
-
-// --- Encoding/decoding utils -------------------------------------------------
-
-/// A decoder to decode `Uuid`s coming from a Postgres query.
-///
-fn uuid_decoder() {
-  use bit_array <- decode.then(decode.bit_array)
-  case uuid.from_bit_array(bit_array) {
-    Ok(uuid) -> decode.success(uuid)
-    Error(_) -> decode.failure(uuid.v7(), "uuid")
-  }
 }
