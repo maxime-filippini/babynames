@@ -27,10 +27,23 @@ pub fn router(
 
   case req.method, segments {
     Get, ["callback"] -> handle_auth(req, ctx)
-    Get, ["auth-button"] ->
+    Get, ["logout"] -> handle_logout(req)
+
+    Get, ["auth-button"] -> {
       auth_button(user, ctx)
       |> utils.to_response
+    }
     _, _ -> wisp.not_found()
+  }
+}
+
+fn handle_logout(req: Request) -> Response {
+  let resp = wisp.redirect("/")
+
+  case wisp.get_cookie(req, "user_id", wisp.Signed) {
+    // expire the cookie
+    Ok(value) -> wisp.set_cookie(resp, req, "user_id", value, wisp.Signed, 0)
+    Error(_) -> resp
   }
 }
 
@@ -108,7 +121,7 @@ pub fn auth_button(
       let res = user.verify(user, ctx.db)
 
       case res {
-        Ok(u) -> log_out_button(u)
+        Ok(u) -> log_out_button(u, "/auth/logout")
         _ -> panic
         // TODO - Handle better
       }
@@ -146,6 +159,9 @@ fn log_in_button(auth_href: String) -> Element(Nil) {
   html.a([attribute.href(auth_href)], [html.text("Log in with Google")])
 }
 
-fn log_out_button(u: user.User(user.Verified)) -> Element(Nil) {
-  html.div([], [html.text("Hello " <> u.name)])
+fn log_out_button(u: user.User(user.Verified), href: String) -> Element(Nil) {
+  html.div([], [
+    html.text("Hello " <> u.name),
+    html.a([attribute.href(href)], [html.text("Log out")]),
+  ])
 }
