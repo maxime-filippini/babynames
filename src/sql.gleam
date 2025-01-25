@@ -1,5 +1,4 @@
 import gleam/dynamic/decode
-import gleam/option.{type Option}
 import pog
 
 /// Runs the `insert_user` query
@@ -32,11 +31,7 @@ VALUES (
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type FindUserRow {
-  FindUserRow(
-    user_id: String,
-    name: Option(String),
-    email: Option(String),
-    email_verified: Option(Bool),
+  FindUserRow(user_id: String, name: String, email: String, email_verified: Bool,
   )
 }
 
@@ -49,9 +44,9 @@ pub type FindUserRow {
 pub fn find_user(db, arg_1) {
   let decoder = {
     use user_id <- decode.field(0, decode.string)
-    use name <- decode.field(1, decode.optional(decode.string))
-    use email <- decode.field(2, decode.optional(decode.string))
-    use email_verified <- decode.field(3, decode.optional(decode.bool))
+    use name <- decode.field(1, decode.string)
+    use email <- decode.field(2, decode.string)
+    use email_verified <- decode.field(3, decode.bool)
     decode.success(FindUserRow(user_id:, name:, email:, email_verified:))
   }
 

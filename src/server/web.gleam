@@ -1,8 +1,10 @@
-import gleam/io
 import pog
 import server/auth/google
 import wisp
 
+/// Context object passed by handler with each request.
+/// This object does not change over the lifetime of the process.
+/// 
 pub type Context {
   Context(
     static_directory: String,
@@ -11,6 +13,8 @@ pub type Context {
   )
 }
 
+/// Standard middleware stack
+/// 
 pub fn middleware(
   req: wisp.Request,
   ctx: Context,
@@ -21,16 +25,6 @@ pub fn middleware(
   use <- wisp.rescue_crashes
   use req <- wisp.handle_head(req)
   use <- wisp.serve_static(req, under: "/static", from: ctx.static_directory)
-
-  // Check for cookie
-  case wisp.get_cookie(req, "token", wisp.Signed) {
-    Ok(v) -> {
-      io.debug(v)
-    }
-    _ -> {
-      io.debug("no cookie")
-    }
-  }
 
   handle_request(req)
 }
