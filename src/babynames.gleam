@@ -1,3 +1,5 @@
+import cli
+
 import envoy
 import gleam/erlang/process
 import mist
@@ -20,6 +22,8 @@ fn db() -> pog.Connection {
 }
 
 pub fn main() {
+  let args = cli.parse_args()
+
   // The Google credentials are required to set up OAuth
   let assert Ok(google_creds) = google.load_credentials()
 
@@ -36,7 +40,7 @@ pub fn main() {
   let assert Ok(_) =
     wisp_mist.handler(handler, secret_key_base)
     |> mist.new
-    |> mist.port(8000)
+    |> mist.port(args.port)
     |> mist.start_http
 
   process.sleep_forever()
