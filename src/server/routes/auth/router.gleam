@@ -5,9 +5,10 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleam/uri
 import pog
+import server/auth/cookie
 import server/auth/google
 import server/auth/user
-import server/routes/auth/views
+import server/layout/elements
 import server/utils
 import server/web
 import sql
@@ -25,7 +26,7 @@ pub fn handle_request(
     Get, ["logout"] -> handle_logout(req)
 
     Get, ["auth-button"] -> {
-      views.auth_button(user, ctx)
+      elements.auth_button(user, ctx)
       |> utils.to_response
     }
     _, _ -> wisp.not_found()
@@ -36,8 +37,7 @@ fn handle_logout(req: Request) -> Response {
   let resp = wisp.redirect("/")
 
   case wisp.get_cookie(req, "user_id", wisp.Signed) {
-    // expire the cookie
-    Ok(value) -> wisp.set_cookie(resp, req, "user_id", value, wisp.Signed, 0)
+    Ok(_value) -> cookie.with_invalidated_user_cookie(req, resp)
     Error(_) -> resp
   }
 }

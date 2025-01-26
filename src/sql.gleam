@@ -10,7 +10,8 @@ import pog
 pub fn insert_user(db, arg_1, arg_2, arg_3, arg_4) {
   let decoder = decode.map(decode.dynamic, fn(_) { Nil })
 
-  let query = "INSERT INTO users (user_id, name, email, email_verified)
+  let query =
+    "INSERT INTO users (user_id, name, email, email_verified)
 VALUES (
     $1, $2, $3, $4
 )"
@@ -49,7 +50,8 @@ pub fn get_random_names(db, arg_1) {
     decode.success(GetRandomNamesRow(rank:, name:, pct:, year:))
   }
 
-  let query = "SELECT *
+  let query =
+    "SELECT *
 FROM baby_names
 ORDER BY RANDOM() LIMIT $1"
 
@@ -72,6 +74,8 @@ pub type FindUserRow {
     email: String,
     email_verified: Bool,
     user_role: UserRole,
+    role: UserRole,
+    rank: Int,
   )
 }
 
@@ -88,14 +92,28 @@ pub fn find_user(db, arg_1) {
     use email <- decode.field(2, decode.string)
     use email_verified <- decode.field(3, decode.bool)
     use user_role <- decode.field(4, user_role_decoder())
-    decode.success(
-      FindUserRow(user_id:, name:, email:, email_verified:, user_role:),
-    )
+    use role <- decode.field(5, user_role_decoder())
+    use rank <- decode.field(6, decode.int)
+    decode.success(FindUserRow(
+      user_id:,
+      name:,
+      email:,
+      email_verified:,
+      user_role:,
+      role:,
+      rank:,
+    ))
   }
 
-  let query = "SELECT *
+  let query =
+    "SELECT *
 FROM users
-WHERE user_id = $1"
+LEFT JOIN roles
+    ON users.user_role = roles.role
+WHERE
+    1 = 1
+    AND user_id = $1
+    AND roles.role IS NOT NULL"
 
   pog.query(query)
   |> pog.parameter(pog.text(arg_1))

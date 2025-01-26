@@ -1,12 +1,19 @@
+import gleam/option.{type Option}
 import lustre/attribute.{attribute as attr}
 import lustre/element.{type Element}
 import lustre/element/html
+import server/auth/user.{type Unverified, type User}
 import server/layout/elements
+import server/web
 
-pub fn layout(body: List(Element(Nil))) {
+pub fn layout(
+  body: List(Element(Nil)),
+  maybe_user: Option(User(Unverified)),
+  ctx: web.Context,
+) {
   html.html([attr("lang", "en")], [
     head("Baby names"),
-    html.body([], [elements.nav_bar(), ..body]),
+    html.body([], [elements.nav_bar(maybe_user, ctx), ..body]),
   ])
 }
 
