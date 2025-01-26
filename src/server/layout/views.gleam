@@ -2,6 +2,10 @@ import lustre/attribute.{attribute as attr}
 import lustre/element.{type Element}
 import lustre/element/html
 
+pub fn layout(body: List(Element(Nil))) {
+  html.html([attr("lang", "en")], [head("Baby names"), html.body([], body)])
+}
+
 pub fn stylesheet(file_name: String) -> Element(Nil) {
   html.link([
     attribute.href("static/" <> file_name),
@@ -9,14 +13,14 @@ pub fn stylesheet(file_name: String) -> Element(Nil) {
   ])
 }
 
-pub fn htmx() -> Element(Nil) {
+fn htmx() -> Element(Nil) {
   html.script(
     [attribute.type_("text/javascript"), attribute.src("static/htmx.min.js")],
     "",
   )
 }
 
-pub fn head(title: String) -> Element(Nil) {
+fn head(title: String) -> Element(Nil) {
   html.head([], [
     html.meta([attr("charset", "UTF-8")]),
     html.meta([
@@ -30,7 +34,7 @@ pub fn head(title: String) -> Element(Nil) {
   ])
 }
 
-pub fn emoji_favicon(emoji: String) -> Element(Nil) {
+fn emoji_favicon(emoji: String) -> Element(Nil) {
   let left =
     "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>"
   let right = "</text></svg>"

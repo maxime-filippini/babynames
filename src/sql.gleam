@@ -31,7 +31,12 @@ VALUES (
 /// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
 ///
 pub type FindUserRow {
-  FindUserRow(user_id: String, name: String, email: String, email_verified: Bool,
+  FindUserRow(
+    user_id: String,
+    name: String,
+    email: String,
+    email_verified: Bool,
+    user_role: UserRole,
   )
 }
 
@@ -47,7 +52,10 @@ pub fn find_user(db, arg_1) {
     use name <- decode.field(1, decode.string)
     use email <- decode.field(2, decode.string)
     use email_verified <- decode.field(3, decode.bool)
-    decode.success(FindUserRow(user_id:, name:, email:, email_verified:))
+    use user_role <- decode.field(4, user_role_decoder())
+    decode.success(
+      FindUserRow(user_id:, name:, email:, email_verified:, user_role:),
+    )
   }
 
   let query = "SELECT *
@@ -58,4 +66,27 @@ WHERE user_id = $1"
   |> pog.parameter(pog.text(arg_1))
   |> pog.returning(decoder)
   |> pog.execute(db)
+}
+
+// --- Enums -------------------------------------------------------------------
+
+/// Corresponds to the Postgres `user_role` enum.
+///
+/// > 🐿️ This type definition was generated automatically using v3.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type UserRole {
+  Authorized
+  Unauthorized
+  Admin
+}
+
+fn user_role_decoder() {
+  use variant <- decode.then(decode.string)
+  case variant {
+    "authorized" -> decode.success(Authorized)
+    "unauthorized" -> decode.success(Unauthorized)
+    "admin" -> decode.success(Admin)
+    _ -> decode.failure(Authorized, "UserRole")
+  }
 }

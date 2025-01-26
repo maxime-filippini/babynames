@@ -2,27 +2,22 @@ import gleam/http.{Get}
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{None, Some}
 import gleam/uri
-import lustre/attribute
-import lustre/element.{type Element}
-import lustre/element/html
 import pog
 import server/auth/google
 import server/auth/user
+import server/routes/auth/views
 import server/utils
 import server/web
 import sql
 import wisp.{type Request, type Response}
 
-/// Router for all routes that match: /auth/...
-/// 
-pub fn router(
+pub fn handle_request(
   req: Request,
   ctx: web.Context,
   segments: List(String),
-) -> wisp.Response {
-  // Read the user from the cookie and pass it to the routes
+) -> Response {
   let user = user.from_cookie(req)
 
   case req.method, segments {
@@ -30,7 +25,7 @@ pub fn router(
     Get, ["logout"] -> handle_logout(req)
 
     Get, ["auth-button"] -> {
-      auth_button(user, ctx)
+      views.auth_button(user, ctx)
       |> utils.to_response
     }
     _, _ -> wisp.not_found()
@@ -47,9 +42,7 @@ fn handle_logout(req: Request) -> Response {
   }
 }
 
-/// Log-in a user
-/// 
-pub fn handle_auth(req: Request, ctx: web.Context) -> Response {
+fn handle_auth(req: Request, ctx: web.Context) -> Response {
   case req.query {
     None -> wisp.not_found()
     Some(v) -> {
@@ -94,7 +87,6 @@ fn insert_user_if_not_in_db(
 
   case rows {
     [] -> {
-      io.debug("No user found for ID " <> token_info.sub)
       let assert Ok(pog.Returned(rows_count, _rows)) =
         sql.insert_user(
           db,
@@ -105,63 +97,9 @@ fn insert_user_if_not_in_db(
         )
 
       io.debug(int.to_string(rows_count) <> " rows inserted!")
+
+      Nil
     }
-    [_v, ..] -> {
-      io.debug("User found for ID " <> token_info.sub)
-    }
+    [_v, ..] -> Nil
   }
-}
-
-pub fn auth_button(
-  user: Option(user.User(user.Unverified)),
-  ctx: web.Context,
-) -> Element(Nil) {
-  case user {
-    Some(user) -> {
-      let res = user.verify(user, ctx.db)
-
-      case res {
-        Ok(u) -> log_out_button(u, "/auth/logout")
-        _ -> panic
-        // TODO - Handle better
-      }
-    }
-    None -> {
-      ctx.google_creds
-      |> auth_uri
-      |> uri.to_string
-      |> log_in_button
-    }
-  }
-}
-
-fn auth_uri(creds: google.AuthCredentials) {
-  uri.Uri(
-    scheme: Some("https"),
-    userinfo: None,
-    host: Some("accounts.google.com"),
-    port: None,
-    path: "o/oauth2/v2/auth",
-    fragment: None,
-    query: Some(
-      uri.query_to_string([
-        #("client_id", creds.client_id),
-        #("redirect_uri", creds.redirect_uri),
-        #("response_type", creds.response_type),
-        #("access_type", creds.access_type),
-        #("scope", creds.scope),
-      ]),
-    ),
-  )
-}
-
-fn log_in_button(auth_href: String) -> Element(Nil) {
-  html.a([attribute.href(auth_href)], [html.text("Log in with Google")])
-}
-
-fn log_out_button(u: user.User(user.Verified), href: String) -> Element(Nil) {
-  html.div([], [
-    html.text("Hello " <> u.name),
-    html.a([attribute.href(href)], [html.text("Log out")]),
-  ])
 }
