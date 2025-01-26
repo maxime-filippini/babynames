@@ -24,6 +24,41 @@ VALUES (
   |> pog.execute(db)
 }
 
+/// A row you get from running the `get_random_names` query
+/// defined in `./src/sql/get_random_names.sql`.
+///
+/// > 🐿️ This type definition was generated automatically using v3.0.0 of the
+/// > [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub type GetRandomNamesRow {
+  GetRandomNamesRow(rank: Int, name: String, pct: Float, year: Int)
+}
+
+/// Runs the `get_random_names` query
+/// defined in `./src/sql/get_random_names.sql`.
+///
+/// > 🐿️ This function was generated automatically using v3.0.0 of
+/// > the [squirrel package](https://github.com/giacomocavalieri/squirrel).
+///
+pub fn get_random_names(db, arg_1) {
+  let decoder = {
+    use rank <- decode.field(0, decode.int)
+    use name <- decode.field(1, decode.string)
+    use pct <- decode.field(2, decode.float)
+    use year <- decode.field(3, decode.int)
+    decode.success(GetRandomNamesRow(rank:, name:, pct:, year:))
+  }
+
+  let query = "SELECT *
+FROM baby_names
+ORDER BY RANDOM() LIMIT $1"
+
+  pog.query(query)
+  |> pog.parameter(pog.int(arg_1))
+  |> pog.returning(decoder)
+  |> pog.execute(db)
+}
+
 /// A row you get from running the `find_user` query
 /// defined in `./src/sql/find_user.sql`.
 ///

@@ -1,0 +1,3 @@
+SELECT *
+FROM baby_names
+ORDER BY RANDOM() LIMIT $1
