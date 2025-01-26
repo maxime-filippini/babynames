@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "tailwind": "npx @tailwindcss/cli -i ./priv/static/input.css -o ./priv/static/styles.css"
+    "tailwind": "sh tailwind.sh"
   },
   "author": "",
   "license": "ISC",
