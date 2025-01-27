@@ -8,7 +8,7 @@ import pog
 import server/auth/cookie
 import server/auth/google
 import server/auth/user
-import server/layout/elements
+import server/routes/auth/views
 import server/utils
 import server/web
 import sql
@@ -22,15 +22,17 @@ pub fn handle_request(
   let user = user.from_cookie(req)
 
   case req.method, segments {
+    Get, ["login"] -> handle_login(req, ctx)
     Get, ["callback"] -> handle_auth(req, ctx)
     Get, ["logout"] -> handle_logout(req)
-
-    Get, ["auth-button"] -> {
-      elements.auth_button(user, ctx)
-      |> utils.to_response
-    }
     _, _ -> wisp.not_found()
   }
+}
+
+fn handle_login(_req: Request, ctx: web.Context) -> Response {
+  ctx
+  |> views.login_page()
+  |> utils.to_response
 }
 
 fn handle_logout(req: Request) -> Response {
@@ -65,7 +67,7 @@ fn handle_auth(req: Request, ctx: web.Context) -> Response {
 
       insert_user_if_not_in_db(ctx.db, token_info, email_verified)
 
-      wisp.redirect("/")
+      wisp.redirect("/app")
       |> wisp.set_cookie(
         req,
         "user_id",

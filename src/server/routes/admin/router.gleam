@@ -4,7 +4,6 @@ import gleam/http.{Get}
 import server/routes/admin/views
 import server/utils
 import server/web
-import sql
 import wisp.{type Request, type Response}
 
 pub fn handle_request(
@@ -12,9 +11,7 @@ pub fn handle_request(
   ctx: web.Context,
   segments: List(String),
 ) -> Response {
-  use req, maybe_user <- web.middleware(req, ctx)
-  use req, user <- web.authenticate(req, ctx, maybe_user)
-  use req, _user <- web.authorize(req, user, [sql.Admin])
+  use req, user <- web.middleware(req, ctx)
 
   case req.method, segments {
     Get, [] -> {

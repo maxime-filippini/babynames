@@ -1,12 +1,11 @@
-import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{type Option, None, Some}
 import pog
 import server/auth/cookie
 import server/auth/google
-import server/auth/user
+import server/auth/user.{type Unverified, type User, type Verified}
 import sql.{type UserRole}
-import wisp.{log_info}
+import wisp
 
 /// Context object passed by handler with each request.
 /// This object does not change over the lifetime of the process.
@@ -24,8 +23,7 @@ pub type Context {
 pub fn middleware(
   req: wisp.Request,
   ctx: Context,
-  handle_request: fn(wisp.Request, option.Option(user.User(user.Unverified))) ->
-    wisp.Response,
+  handle_request: fn(wisp.Request, Option(User(Unverified))) -> wisp.Response,
 ) -> wisp.Response {
   let req = wisp.method_override(req)
   use <- wisp.log_request(req)
@@ -33,28 +31,30 @@ pub fn middleware(
   use req <- wisp.handle_head(req)
   use <- wisp.serve_static(req, under: "/static", from: ctx.static_directory)
 
-  let usr = user.from_cookie(req)
+  let maybe_user = user.from_cookie(req)
+  // use req, user <- authenticate(req, ctx, maybe_user)
 
-  handle_request(req, usr)
+  handle_request(req, maybe_user)
 }
 
 pub fn authenticate(
   req: wisp.Request,
   ctx: Context,
-  maybe_user: option.Option(user.User(user.Unverified)),
-  handle_request: fn(wisp.Request, user.User(user.Verified)) -> wisp.Response,
+  maybe_user: option.Option(User(Unverified)),
+  handle_request: fn(wisp.Request, User(Verified)) -> wisp.Response,
 ) {
   case maybe_user {
     Some(v) -> {
       case user.verify(v, ctx.db) {
         Ok(u) -> handle_request(req, u)
         Error(_) -> {
-          wisp.response(401) |> cookie.with_invalidated_user_cookie(req, _)
+          wisp.redirect("/auth/login")
+          |> cookie.with_invalidated_user_cookie(req, _)
         }
       }
     }
     None -> {
-      wisp.response(401)
+      wisp.redirect("/auth/login")
     }
   }
 }

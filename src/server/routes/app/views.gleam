@@ -1,5 +1,9 @@
-import lustre/element/html
+import lustre/element.{type Element}
+import pog
+import server/auth/user.{type User, type Verified}
 
-pub fn main() {
-  html.p([], [html.text("Hello, this is the app!")])
+import server/routes/app/lists/views.{page as lists_page}
+
+pub fn page(db: pog.Connection, user: User(Verified)) -> Element(Nil) {
+  lists_page(user, db)
 }

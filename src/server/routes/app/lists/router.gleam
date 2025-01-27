@@ -1,9 +1,9 @@
-import gleam/http.{Get}
-import server/routes/app/lists/router as lists_router
-import server/routes/app/views
+import gleam/http.{Get, Post}
+import server/routes/app/lists/views
 import server/utils
 import sql
 
+import server/routes/app/lists/crud
 import server/web
 import wisp.{type Request, type Response}
 
@@ -17,12 +17,13 @@ pub fn handle_request(
   use req, user <- web.authorize(req, user, [sql.Authorized, sql.Admin])
 
   case req.method, segments {
-    // Root
-    Get, [] ->
-      views.page(ctx.db, user)
+    Get, [] -> views.list_of_lists(ctx.db, user) |> utils.to_response
+    Get, [id] -> {
+      views.find_all_items(ctx.db, id)
       |> utils.to_response
-
-    _, ["lists", ..s] -> lists_router.handle_request(req, ctx, s)
+    }
+    Post, [id, "crud"] -> crud.add_item_to_list(req, ctx, id)
+    Post, ["crud"] -> crud.create_list(req, ctx)
 
     _, _ -> wisp.not_found()
   }
