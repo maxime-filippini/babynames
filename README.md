@@ -13,3 +13,4 @@ Simple web app for voting on baby names.
 - [x] Refactor folders into routers and html
 - [ ] Add functions for building protected routes, i.e. using a User object stored in context.
 - [ ] Implement authorized vs unauthorized users
+- [ ] Switch to PicoCSS for simplicity
