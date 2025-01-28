@@ -1,5 +1,6 @@
 import app/router
 import babynames/cli
+import gleam/io
 
 import babynames/auth/google
 import babynames/web.{Context}
@@ -24,13 +25,20 @@ fn db() -> pog.Connection {
 pub fn main() {
   let args = cli.parse_args()
 
+  io.debug("Beginning")
+
   // The Google credentials are required to set up OAuth
   let assert Ok(google_creds) = google.load_credentials()
+
+  io.debug("Google credentials loaded from ENV")
+  io.debug(google_creds)
 
   // Secret key is used to sign cookies
   let assert Ok(secret_key_base) = envoy.get("WISP_SECRET_KEY_BASE")
 
   wisp.configure_logger()
+
+  io.debug("Logger configured")
 
   let ctx =
     Context(static_directory: static_directory(), google_creds:, db: db())
@@ -41,6 +49,7 @@ pub fn main() {
     wisp_mist.handler(handler, secret_key_base)
     |> mist.new
     |> mist.port(args.port)
+    |> mist.bind("0.0.0.0")
     |> mist.start_http
 
   process.sleep_forever()

@@ -1,0 +1,9 @@
+services:
+  server:
+    build:
+      context: .
+    env_file: 
+      - .env
+    image: babynames-server
+    ports:
+      - "8000:8000"
