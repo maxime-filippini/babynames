@@ -6,4 +6,4 @@ services:
       - .env
     image: babynames-server
     ports:
-      - "8000:8000"
+      - "2222:2222"

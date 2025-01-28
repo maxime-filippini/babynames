@@ -7,7 +7,7 @@ pub type CommandLineArgs {
 }
 
 fn port_opt() -> Opt(Int) {
-  opt.new("port") |> opt.int |> opt.default(8000)
+  opt.new("port") |> opt.int |> opt.default(2222)
 }
 
 fn command() -> Command(CommandLineArgs) {

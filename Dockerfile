@@ -12,7 +12,7 @@ FROM ghcr.io/gleam-lang/gleam:${GLEAM_VERSION}-erlang-alpine
 
 COPY --from=builder /build/server/build/erlang-shipment /app
 
-EXPOSE 8000
+EXPOSE 2222
 WORKDIR /app
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["run"]
