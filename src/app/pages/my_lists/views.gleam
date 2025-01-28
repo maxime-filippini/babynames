@@ -1,3 +1,15 @@
+// This file contains the views for our app. This is where we would usually
+// use a template. In Gleam, we build our HTML directly in a Gleam file.
+//
+// Because we use HTMX, we usually split these views into two categories:
+// - `page` will refer to what the user will see if they navigate to /app/lists
+// - The other view functions are fragments that will be used by HTMX to re-render
+//   parts of the page
+
+import app/pages/layout
+import babynames/attributes
+import babynames/auth/user
+import babynames/elements
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/string
@@ -5,13 +17,10 @@ import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 import pog
-import server/attributes
-import server/elements
 import sql
 import youid/uuid
 
-import server/auth/user
-import server/routes/app/lists/layout.{layout}
+// import server/routes/app/lists/layout.{layout}
 
 // List page
 pub fn page(user: user.User(user.Verified), db: pog.Connection) {
@@ -28,7 +37,7 @@ pub fn page(user: user.User(user.Verified), db: pog.Connection) {
       list_of_lists(db, user),
     ])
 
-  let body = [
+  let body =
     html.div([attribute.class("flex flex-col p-8 gap-4 h-full")], [
       elements.h1("👋 Hello " <> name <> "!"),
       html.div([], [html.p([], [html.text("(" <> user.email <> ")")])]),
@@ -41,11 +50,10 @@ pub fn page(user: user.User(user.Verified), db: pog.Connection) {
           [html.div([attribute.id("list-items")], [])],
         ),
       ]),
-    ]),
-  ]
+    ])
 
-  body
-  |> layout
+  [body]
+  |> layout.layout
 }
 
 // Elements on the list page
@@ -58,7 +66,7 @@ fn list_entry_in_lol(item: sql.GetListsRow) -> Element(a) {
   html.div([], [
     elements.button(
       [
-        attributes.hx_get("/app/lists/" <> item_id),
+        attributes.hx_get("/api/lists/" <> item_id <> "/items"),
         attributes.hx_target("#list-items"),
         attribute.class("flex gap-2"),
       ],

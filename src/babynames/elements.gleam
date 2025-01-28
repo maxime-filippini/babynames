@@ -1,7 +1,7 @@
+import babynames/auth/user.{type User, type Verified}
 import lustre/attribute.{type Attribute, attribute as attr}
 import lustre/element.{type Element}
 import lustre/element/html
-import server/auth/user.{type User, type Verified}
 
 type NavItem {
   Home
@@ -24,10 +24,6 @@ fn nav_items() {
     [attribute.class("flex p-4 gap-8 border border-gray-100 bg-gray-50")],
     [to_html(Home), to_html(App), to_html(Admin)],
   )
-}
-
-fn email_indicator(user: User(Verified)) -> Element(Nil) {
-  html.p([], [html.text(user.email)])
 }
 
 pub fn nav_bar() -> Element(Nil) {

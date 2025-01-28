@@ -1,11 +1,13 @@
+import babynames/auth/cookie
+import babynames/auth/google
+import babynames/auth/user.{type Unverified, type User, type Verified}
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import pog
-import server/auth/cookie
-import server/auth/google
-import server/auth/user.{type Unverified, type User, type Verified}
 import sql.{type UserRole}
 import wisp
+
+const login_endpoint = "/auth/login"
 
 /// Context object passed by handler with each request.
 /// This object does not change over the lifetime of the process.
@@ -48,13 +50,13 @@ pub fn authenticate(
       case user.verify(v, ctx.db) {
         Ok(u) -> handle_request(req, u)
         Error(_) -> {
-          wisp.redirect("/auth/login")
+          wisp.redirect(login_endpoint)
           |> cookie.with_invalidated_user_cookie(req, _)
         }
       }
     }
     None -> {
-      wisp.redirect("/auth/login")
+      wisp.redirect(login_endpoint)
     }
   }
 }

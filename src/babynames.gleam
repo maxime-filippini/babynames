@@ -1,12 +1,12 @@
-import cli
+import app/router
+import babynames/cli
 
+import babynames/auth/google
+import babynames/web.{Context}
 import envoy
 import gleam/erlang/process
 import mist
 import pog
-import server/auth/google
-import server/router
-import server/web.{Context}
 import wisp
 
 import wisp/wisp_mist
@@ -35,7 +35,7 @@ pub fn main() {
   let ctx =
     Context(static_directory: static_directory(), google_creds:, db: db())
 
-  let handler = router.handle_request(_, ctx)
+  let handler = router.route_request(_, ctx)
 
   let assert Ok(_) =
     wisp_mist.handler(handler, secret_key_base)

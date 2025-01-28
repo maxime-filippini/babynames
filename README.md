@@ -13,5 +13,5 @@ Simple web app for voting on baby names.
 - [x] Refactor folders into routers and html
 - [ ] Add functions for building protected routes, i.e. using a User object stored in context.
 - [ ] Implement authorized vs unauthorized users
-- [ ] Use tailwind CLI on gleam files directly, remove the build step (tailwind doesn't parse files, and instead just finds strings that match their class names, so it'll work [ref](https://tailwindcss.com/docs/detecting-classes-in-source-files))
+- [x] Use tailwind CLI on gleam files directly, remove the build step (tailwind doesn't parse files, and instead just finds strings that match their class names, so it'll work [ref](https://tailwindcss.com/docs/detecting-classes-in-source-files))
 - [ ] Implement file watcher and hot reload based on what is done in `lustre-dev-tools` 

@@ -1,6 +1,6 @@
+import babynames/auth/google
 import gleam/option.{None, Some}
 import gleam/uri
-import server/auth/google
 
 pub fn auth_uri(creds: google.AuthCredentials) {
   uri.Uri(

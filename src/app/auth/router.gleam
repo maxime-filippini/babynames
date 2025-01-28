@@ -1,26 +1,25 @@
+import app/auth/views
+import babynames/auth/cookie
+import babynames/auth/google
+import babynames/auth/user.{type Unverified, type User}
+import babynames/utils
+import babynames/web
 import gleam/http.{Get}
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option.{type Option, None, Some}
 import gleam/uri
 import pog
-import server/auth/cookie
-import server/auth/google
-import server/auth/user
-import server/routes/auth/views
-import server/utils
-import server/web
 import sql
 import wisp.{type Request, type Response}
 
-pub fn handle_request(
+pub fn route_request(
   req: Request,
   ctx: web.Context,
+  _maybe_user: Option(User(Unverified)),
   segments: List(String),
 ) -> Response {
-  let user = user.from_cookie(req)
-
   case req.method, segments {
     Get, ["login"] -> handle_login(req, ctx)
     Get, ["callback"] -> handle_auth(req, ctx)

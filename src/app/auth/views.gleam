@@ -1,9 +1,9 @@
+import babynames/auth/uris
+import babynames/web
 import gleam/uri
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
-import server/auth/uris
-import server/web
 
 pub fn login_page(ctx: web.Context) -> Element(Nil) {
   ctx.google_creds
